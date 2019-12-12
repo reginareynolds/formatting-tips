@@ -1,0 +1,82 @@
+<!--This script shows how to:
+    1. Resize the contents of an external site to fit within an iFrame's chosen dimensions.
+    2. Dynamically resize the <div> containing the iFrame to always use the greatest possible size without causing
+       scrolling.
+
+    How it works:
+    Resizing the contents of the external site uses a ratio between the iFrame's chosen dimensions and the external
+    content's actual dimensions. By determining whether the height or the width will exceed the allowable size first,
+    we can create the correct ratio:
+                                    maxWidth/maxHeight ? frameWidth/frameHeight
+    If the expression on the left is bigger, then the maxHeight must be the limiting factor. If the expression on the
+    right is bigger, then the maxWidth must be the limiting factor. The ratio to scale by in order to have the biggest
+    possible iFrame content while still retaining proportionality is the limiting factor dimension over the
+    corresponding chosen iFrame dimension.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>iFrame Scaling</title>
+
+    <script>
+        let frame = document.getElementsByClassName("frame");
+
+        for (let i = 0; i < frame.length; i++) {
+            let frameWidth = frame[i].getAttribute("width");  // Actual dimension
+            let frameHeight = frame[i].getAttribute("height");  // Actual dimension
+            let resolution = frameWidth/frameHeight;  // Ratio of external content's actual dimensions
+
+            // The allowable dimensions can be set to whatever, the below is just an example
+            let maxHeight = document.documentElement.clientHeight - 330;  // Maximum allowable height in viewport
+            let maxWidth = 0.9 * document.documentElement.clientWidth; // Maximum allowable width in viewport
+            let maxResolution = maxWidth/maxHeight;
+            let scale;  // Set scale based on limiting factor
+
+            // Width is limiting factor
+            if(maxResolution<resolution){
+                scale = maxWidth/frameWidth;
+            }
+            // Height is limiting factor
+            else if(maxResolution>resolution){
+                scale = maxHeight/frameHeight;
+            }
+            // Neither is limiting factor
+            else{
+                // iFrame is already correctly scaled
+            }
+
+            frame[i].style.webkitTransform = "scale(" + scale.toString() + ")";
+            let div = frame[i].parentElement;
+            div.style.width = frame[i].getBoundingClientRect().width + "px";
+            div.style.height = (frame[i].getBoundingClientRect().height + 10) + "px";
+        }
+    </script>
+
+    <style>
+        .frame {
+            /* Keep iframe in place when scaling */
+            -moz-transform-origin: top left;
+            -webkit-transform-origin: top left;
+            -o-transform-origin: top left;
+            -ms-transform-origin: top left;
+            transform-origin: top left;
+        }
+
+        #container{
+            /* Keep div containing iframe centered */
+            margin-left: auto;
+            margin-right: auto;
+            overflow: hidden;
+        }
+    </style>
+
+
+</head>
+<body>
+    <div id="container">
+            <iframe class=frame width="1490" height="930" frameborder="0" scrolling="yes" src=""></iframe>
+    </div>
+</body>
+</html>
